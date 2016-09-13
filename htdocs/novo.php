@@ -13,14 +13,13 @@
 <?php
 if( isset($_POST['nome']) &&("" != trim($_POST['nome'])) )
 {
- $conexao = new MongoClient();
- $collection = $conexao->test->seriados;
-
+ $conexao = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+ $bulk = new MongoDB\Driver\BulkWrite;
  $personagens =array($_POST['personagem1'],$_POST['personagem2'],$_POST['personagem3'],$_POST['personagem4'],$_POST['personagem5'],$_POST['personagem6']);
- $documento = array( "nome" => $_POST['nome'], "personagens" => $personagens);
-
- $collection->insert($documento);
-
+ $documento = array('_id' => new MongoDB\BSON\ObjectID,"nome" => $_POST['nome'],"personagens" => $personagens);
+ $bulk->insert($documento);
+ // var_dump($documento);
+ $conexao->executeBulkWrite('test.seriados', $bulk);
  echo "<br/><div class=\"alert alert-warning\">Seriado cadastrado!</div>";
 }
 ?>

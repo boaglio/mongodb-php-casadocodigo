@@ -1,7 +1,7 @@
 <?php
- $conexao = new MongoClient();
- $collection = $conexao->test->seriados;
- $cursor = $collection->find();
+ $conexao = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+ $query = new MongoDB\Driver\Query([]);
+ $cursor = $conexao->executeQuery("test.seriados",$query);
 ?>
 <html>
  <head>
@@ -20,8 +20,8 @@
 <?php
  foreach ($cursor as $documento) {
  	echo "<a class=\"alert alert-success\" href=\"detalhe.php?id=".
- 	      $documento["_id"]."\">".
- 	      $documento["nome"]."</a>";
+ 	      $documento->_id."\">".
+ 	      $documento->nome."</a>";
  }
  ?>
 

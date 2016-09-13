@@ -21,14 +21,15 @@ function mostra($campo) {
   }
 }
 
-$conexao = new MongoClient();
-$collection = $conexao->test->seriados;
+$conexao = new MongoDB\Driver\Manager("mongodb://localhost:27017");
 
 if( isset($_GET['id']) &&("" != trim($_GET['id'])) )
 {
  $id = $_GET['id'];
- $cursor = $collection->find( array('_id' => new MongoId($id)));
- $documento= $cursor->getNext();
+ $query = new MongoDB\Driver\Query(['_id' => new \MongoDB\BSON\ObjectID($id) ]);
+ $cursor = $conexao->executeQuery("test.seriados",$query); 
+ foreach ($cursor as $documento) {}
+ 
 }
 if( isset($_POST['id']) &&("" != trim($_POST['id'])))
 {
@@ -37,15 +38,20 @@ if( isset($_POST['id']) &&("" != trim($_POST['id'])))
   if ($_POST['opt'] == "alterar") {
 
    $personagens =array($_POST['personagem1'],$_POST['personagem2'],$_POST['personagem3'],$_POST['personagem4'],$_POST['personagem5'],$_POST['personagem6']);
-   $documento = array( "nome" => $_POST['nome'], "personagens" => $personagens);
-   $collection->update(array('_id' => new MongoId($id)),$documento, array('upsert'=>true));
+
+   $bulk = new MongoDB\Driver\BulkWrite;
+   $bulk->update(['_id' => new MongoDB\BSON\ObjectID($id)],[ "nome" => $_POST['nome'], "personagens" => $personagens]);
+   $conexao->executeBulkWrite('test.seriados', $bulk);
 
    echo "<br/><div class=\"alert alert-warning\">Seriado alterado!</div>";
   }
 
   if( $_POST['opt'] == "remover")
   {
-	$collection->remove(array('_id' => new MongoId($id)));
+  $bulk = new MongoDB\Driver\BulkWrite;
+  $bulk->delete(['_id' => new MongoDB\BSON\ObjectID($id)]);
+  $conexao->executeBulkWrite('test.seriados', $bulk);
+
 	echo "<br/><div class=\"alert alert-warning\">Seriado removido!</div>";
   }
 
@@ -56,31 +62,31 @@ if( isset($_POST['id']) &&("" != trim($_POST['id'])))
    <p>
     <div class="input-group">
      <span class="input-group-addon">Nome</span>
-     <input type="text" name="nome" id="nome" class="form-control" value="<?php mostra($documento['nome']); ?>" placeholder="nome do seriado ?">
+     <input type="text" name="nome" id="nome" class="form-control" value="<?php mostra($documento->nome); ?>" placeholder="nome do seriado ?">
     </div>
     <div class="input-group">
      <span class="input-group-addon">Personagem 1</span>
-     <input type="text" name="personagem1" id="personagem1" value="<?php mostra($documento['personagens'][0]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem1" id="personagem1" value="<?php mostra($documento->personagens[0]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
     <div class="input-group">
      <span class="input-group-addon">Personagem 2</span>
-     <input type="text" name="personagem2" id="personagem2" value="<?php mostra($documento['personagens'][1]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem2" id="personagem2" value="<?php mostra($documento->personagens[1]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
     <div class="input-group">
      <span class="input-group-addon">Personagem 3</span>
-     <input type="text" name="personagem3" id="personagem3" value="<?php mostra($documento['personagens'][2]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem3" id="personagem3" value="<?php mostra($documento->personagens[2]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
     <div class="input-group">
      <span class="input-group-addon">Personagem 4</span>
-     <input type="text" name="personagem4" id="personagem4" value="<?php mostra($documento['personagens'][3]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem4" id="personagem4" value="<?php mostra($documento->personagens[3]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
         <div class="input-group">
      <span class="input-group-addon">Personagem 5</span>
-     <input type="text" name="personagem5" id="personagem5" value="<?php mostra($documento['personagens'][4]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem5" id="personagem5" value="<?php mostra($documento->personagens[4]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
     <div class="input-group">
      <span class="input-group-addon">Personagem 6</span>
-     <input type="text" name="personagem6" id="personagem6" value="<?php mostra($documento['personagens'][5]); ?>" class="form-control" placeholder="nome de um personagem ?">
+     <input type="text" name="personagem6" id="personagem6" value="<?php mostra($documento->personagens[5]); ?>" class="form-control" placeholder="nome de um personagem ?">
     </div>
     </p>
    <p>
