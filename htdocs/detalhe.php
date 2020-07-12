@@ -25,8 +25,8 @@ $conexao = new MongoDB\Driver\Manager("mongodb://localhost:27017");
 
 if( isset($_GET['id']) &&("" != trim($_GET['id'])) )
 {
- $id = $_GET['id'];
- $query = new MongoDB\Driver\Query(['_id' => new \MongoDB\BSON\ObjectID($id) ]);
+ $id =  $_GET['id'];
+ $query = new MongoDB\Driver\Query(['_id' => (int) $id  ]);
  $cursor = $conexao->executeQuery("test.seriados",$query); 
  foreach ($cursor as $documento) {}
  
@@ -40,7 +40,7 @@ if( isset($_POST['id']) &&("" != trim($_POST['id'])))
    $personagens =array($_POST['personagem1'],$_POST['personagem2'],$_POST['personagem3'],$_POST['personagem4'],$_POST['personagem5'],$_POST['personagem6']);
 
    $bulk = new MongoDB\Driver\BulkWrite;
-   $bulk->update(['_id' => new MongoDB\BSON\ObjectID($id)],[ "nome" => $_POST['nome'], "personagens" => $personagens]);
+   $bulk->update(['_id' => (int) $id],[ "nome" => $_POST['nome'], "personagens" => $personagens]);
    $conexao->executeBulkWrite('test.seriados', $bulk);
 
    echo "<br/><div class=\"alert alert-warning\">Seriado alterado!</div>";
@@ -49,7 +49,7 @@ if( isset($_POST['id']) &&("" != trim($_POST['id'])))
   if( $_POST['opt'] == "remover")
   {
   $bulk = new MongoDB\Driver\BulkWrite;
-  $bulk->delete(['_id' => new MongoDB\BSON\ObjectID($id)]);
+  $bulk->delete(['_id' => (int) $id]);
   $conexao->executeBulkWrite('test.seriados', $bulk);
 
 	echo "<br/><div class=\"alert alert-warning\">Seriado removido!</div>";
@@ -61,7 +61,7 @@ if( isset($_POST['id']) &&("" != trim($_POST['id'])))
    <form method="post" action="detalhe.php">
    <p>
     <div class="input-group">
-     <span class="input-group-addon">Nome</span>
+     <span class="input-group-addon">Nome [<?php mostra($documento->_id); ?>] </span>
      <input type="text" name="nome" id="nome" class="form-control" value="<?php mostra($documento->nome); ?>" placeholder="nome do seriado ?">
     </div>
     <div class="input-group">
